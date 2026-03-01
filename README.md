@@ -236,4 +236,4 @@ Project ini dibuat untuk keperluan pembelajaran. Free to use and modify.
 
 ---
 
-Made with ❤️ by VinShop Team
+Made with ❤️ by Havin
