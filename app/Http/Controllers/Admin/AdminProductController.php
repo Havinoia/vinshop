@@ -8,10 +8,30 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 
 class AdminProductController extends Controller
 {
+    private function getCloudinary()
+    {
+        return new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key'    => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ]
+        ]);
+    }
+
+    private function uploadImage($file, $folder = 'vinshop/products')
+    {
+        $cloudinary = $this->getCloudinary();
+        $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+            'folder' => $folder
+        ]);
+        return $result['secure_url'];
+    }
+
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(10);
@@ -37,13 +57,9 @@ class AdminProductController extends Controller
             'is_active'   => 'boolean',
         ]);
 
-        // Upload foto utama ke Cloudinary
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $uploaded = Cloudinary::upload($request->file('image')->getRealPath(), [
-                'folder' => 'vinshop/products'
-            ]);
-            $imagePath = $uploaded->getSecurePath();
+            $imagePath = $this->uploadImage($request->file('image'));
         }
 
         $product = Product::create([
@@ -57,15 +73,11 @@ class AdminProductController extends Controller
             'is_active'   => $request->boolean('is_active'),
         ]);
 
-        // Upload foto tambahan ke Cloudinary
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $uploaded = Cloudinary::upload($image->getRealPath(), [
-                    'folder' => 'vinshop/products'
-                ]);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image'      => $uploaded->getSecurePath(),
+                    'image'      => $this->uploadImage($image),
                     'order'      => $index,
                 ]);
             }
@@ -97,10 +109,7 @@ class AdminProductController extends Controller
 
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
-            $uploaded = Cloudinary::upload($request->file('image')->getRealPath(), [
-                'folder' => 'vinshop/products'
-            ]);
-            $imagePath = $uploaded->getSecurePath();
+            $imagePath = $this->uploadImage($request->file('image'));
         }
 
         $product->update([
@@ -116,12 +125,9 @@ class AdminProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $uploaded = Cloudinary::upload($image->getRealPath(), [
-                    'folder' => 'vinshop/products'
-                ]);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image'      => $uploaded->getSecurePath(),
+                    'image'      => $this->uploadImage($image),
                     'order'      => $index,
                 ]);
             }

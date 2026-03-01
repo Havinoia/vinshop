@@ -7,10 +7,25 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 
 class ProfileController extends Controller
 {
+    private function uploadAvatar($file)
+    {
+        $cloudinary = new Cloudinary([
+            'cloud' => [
+                'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                'api_key'    => env('CLOUDINARY_API_KEY'),
+                'api_secret' => env('CLOUDINARY_API_SECRET'),
+            ]
+        ]);
+        $result = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+            'folder' => 'vinshop/avatars'
+        ]);
+        return $result['secure_url'];
+    }
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -21,14 +36,10 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-
         $user->fill($request->safe()->except('avatar'));
 
         if ($request->hasFile('avatar')) {
-            $uploaded = Cloudinary::upload($request->file('avatar')->getRealPath(), [
-                'folder' => 'vinshop/avatars'
-            ]);
-            $user->avatar = $uploaded->getSecurePath();
+            $user->avatar = $this->uploadAvatar($request->file('avatar'));
         }
 
         if ($user->isDirty('email')) {
