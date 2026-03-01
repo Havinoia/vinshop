@@ -10,24 +10,26 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Buat akun admin
-        User::create([
-            'name'     => 'Admin VinShop',
-            'email'    => 'admin@vinshop.com',
-            'password' => Hash::make('password'),
-            'role'     => 'admin',
-            'phone'    => '081234567890',
-            'address'  => 'Jl. Admin No. 1, Jakarta',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@vinshop.com'],
+            [
+                'name'     => 'Admin VinShop',
+                'password' => Hash::make('password'),
+                'role'     => 'admin',
+                'phone'    => '081234567890',
+                'address'  => 'Jl. Admin No. 1, Jakarta',
+            ]
+        );
 
-        // Buat akun customer untuk testing
-        User::create([
-            'name'     => 'Customer Test',
-            'email'    => 'customer@vinshop.com',
-            'password' => Hash::make('password'),
-            'role'     => 'customer',
-            'phone'    => '089876543210',
-            'address'  => 'Jl. Customer No. 2, Surabaya',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'customer@vinshop.com'],
+            [
+                'name'     => 'Customer Test',
+                'password' => Hash::make('password'),
+                'role'     => 'customer',
+                'phone'    => '089876543210',
+                'address'  => 'Jl. Customer No. 2, Surabaya',
+            ]
+        );
     }
 }

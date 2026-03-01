@@ -87,15 +87,19 @@ class ProductSeeder extends Seeder
         foreach ($products as $data) {
             $category = Category::where('name', $data['category'])->first();
 
-            Product::create([
-                'category_id' => $category->id,
-                'name'        => $data['name'],
-                'slug'        => Str::slug($data['name']),
-                'price'       => $data['price'],
-                'stock'       => $data['stock'],
-                'description' => $data['description'],
-                'is_active'   => true,
-            ]);
+            if (!$category) continue;
+
+            Product::firstOrCreate(
+                ['slug' => Str::slug($data['name'])],
+                [
+                    'category_id' => $category->id,
+                    'name'        => $data['name'],
+                    'price'       => $data['price'],
+                    'stock'       => $data['stock'],
+                    'description' => $data['description'],
+                    'is_active'   => true,
+                ]
+            );
         }
     }
 }
