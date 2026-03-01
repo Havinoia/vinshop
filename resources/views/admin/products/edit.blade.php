@@ -66,7 +66,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Foto Utama</label>
                     @if($product->image)
-                        <img src="{{ Storage::url($product->image) }}"
+                        <img src="{{ $product->image }}"
                              alt="{{ $product->name }}"
                              class="w-24 h-24 object-cover rounded-lg mb-2">
                         <p class="text-xs text-gray-400 mb-2">Upload foto baru untuk mengganti foto lama</p>
@@ -81,7 +81,7 @@
                     @if($product->images->count())
                         <div class="flex gap-2 flex-wrap mb-2">
                             @foreach($product->images as $image)
-                                <img src="{{ Storage::url($image->image) }}"
+                                <img src="{{ $product->image }}"
                                      alt="foto tambahan"
                                      class="w-16 h-16 object-cover rounded-lg border border-gray-200">
                             @endforeach

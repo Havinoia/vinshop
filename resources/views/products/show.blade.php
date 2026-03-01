@@ -10,7 +10,7 @@
         {{-- Foto Produk --}}
         <div class="w-full md:w-1/2">
             @if($product->image)
-            <img src="{{ Storage::url($product->image) }}"
+            <img src="{{ $product->image }}"
                 alt="{{ $product->name }}"
                 class="w-full h-96 object-cover rounded-xl mb-3">
             @else
@@ -23,7 +23,7 @@
             @if($product->images->count())
             <div class="flex gap-2 flex-wrap">
                 @foreach($product->images as $image)
-                <img src="{{ Storage::url($image->image) }}"
+                <img src="{{ $product->image }}"
                     alt="{{ $product->name }}"
                     class="w-20 h-20 object-cover rounded-lg border border-gray-200">
                 @endforeach
@@ -85,7 +85,7 @@
         <a href="{{ route('products.show', $item->slug) }}"
             class="bg-white rounded-xl shadow hover:shadow-md transition overflow-hidden">
             @if($item->image)
-            <img src="{{ Storage::url($item->image) }}"
+            <img src="{{ $product->image }}"
                 alt="{{ $item->name }}"
                 class="w-full h-40 object-cover">
             @else

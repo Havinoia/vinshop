@@ -47,7 +47,7 @@
             <a href="{{ route('products.show', $product->slug) }}"
                 class="bg-white rounded-xl shadow hover:shadow-md transition overflow-hidden">
                 @if($product->image)
-                <img src="{{ Storage::url($product->image) }}"
+                <img src="{{ $product->image }}"
                     alt="{{ $product->name }}"
                     class="w-full h-48 object-cover">
                 @else
