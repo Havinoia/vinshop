@@ -8,5 +8,7 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    base: process.env.ASSET_URL ? process.env.ASSET_URL + '/build/' : '/build/',
+    server: {
+        host: '0.0.0.0',
+    },
 });
