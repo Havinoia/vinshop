@@ -26,7 +26,53 @@ class AdminProductController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all(), config('cloudinary'));
+        $request->validate([
+            'category_id' => 'required|exists:categories,id',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'is_active'   => 'boolean',
+        ]);
+
+        // Upload foto utama ke Cloudinary
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $uploaded = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'vinshop/products'
+            ]);
+            $imagePath = $uploaded->getSecurePath();
+        }
+
+        $product = Product::create([
+            'category_id' => $request->category_id,
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
+            'description' => $request->description,
+            'price'       => $request->price,
+            'stock'       => $request->stock,
+            'image'       => $imagePath,
+            'is_active'   => $request->boolean('is_active'),
+        ]);
+
+        // Upload foto tambahan ke Cloudinary
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $uploaded = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'vinshop/products'
+                ]);
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'image'      => $uploaded->getSecurePath(),
+                    'order'      => $index,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Produk berhasil ditambahkan!');
     }
 
     public function edit(Product $product)
