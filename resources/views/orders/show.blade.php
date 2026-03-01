@@ -19,7 +19,7 @@
                 @foreach($order->orderItems as $item)
                 <div class="flex items-center gap-4">
                     @if($item->product->image)
-                    <img src="{{ Storage::url($item->product->image) }}"
+                    <img src="{{ $product->image }}"
                         alt="{{ $item->product->name }}"
                         class="w-16 h-16 object-cover rounded-lg">
                     @else
