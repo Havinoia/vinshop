@@ -13,11 +13,15 @@ class AppServiceProvider extends ServiceProvider
     }
 
     public function boot(): void
-{
-    Config::$serverKey    = config('services.midtrans.server_key');
-    Config::$isProduction = config('services.midtrans.is_production');
-    Config::$isSanitized  = config('services.midtrans.is_sanitized');
-    Config::$is3ds        = config('services.midtrans.is_3ds');
-    Config::$overrideNotifUrl = null;
-}
+    {
+        if (env('APP_ENV') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
+        // Konfigurasi Midtrans
+        Config::$serverKey    = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized  = config('services.midtrans.is_sanitized');
+        Config::$is3ds        = config('services.midtrans.is_3ds');
+    }
 }
