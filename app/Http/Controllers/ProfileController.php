@@ -6,8 +6,8 @@ use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProfileController extends Controller
 {
@@ -22,15 +22,13 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        // Fill data kecuali avatar dulu
         $user->fill($request->safe()->except('avatar'));
 
-        // Upload avatar
         if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
-            }
-            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+            $uploaded = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+                'folder' => 'vinshop/avatars'
+            ]);
+            $user->avatar = $uploaded->getSecurePath();
         }
 
         if ($user->isDirty('email')) {

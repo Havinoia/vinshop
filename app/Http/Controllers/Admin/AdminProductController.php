@@ -8,21 +8,19 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class AdminProductController extends Controller
 {
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(10);
-
         return view('admin.products.index', compact('products'));
     }
 
     public function create()
     {
         $categories = Category::all();
-
         return view('admin.products.create', compact('categories'));
     }
 
@@ -39,13 +37,15 @@ class AdminProductController extends Controller
             'is_active'   => 'boolean',
         ]);
 
-        // Upload foto utama
+        // Upload foto utama ke Cloudinary
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+            $uploaded = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'vinshop/products'
+            ]);
+            $imagePath = $uploaded->getSecurePath();
         }
 
-        // Buat produk baru
         $product = Product::create([
             'category_id' => $request->category_id,
             'name'        => $request->name,
@@ -57,13 +57,15 @@ class AdminProductController extends Controller
             'is_active'   => $request->boolean('is_active'),
         ]);
 
-        // Upload foto tambahan
+        // Upload foto tambahan ke Cloudinary
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
+                $uploaded = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'vinshop/products'
+                ]);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image'      => $path,
+                    'image'      => $uploaded->getSecurePath(),
                     'order'      => $index,
                 ]);
             }
@@ -77,7 +79,6 @@ class AdminProductController extends Controller
     {
         $categories = Category::all();
         $product->load('images');
-
         return view('admin.products.edit', compact('product', 'categories'));
     }
 
@@ -94,14 +95,12 @@ class AdminProductController extends Controller
             'is_active'   => 'boolean',
         ]);
 
-        // Upload foto utama baru kalau ada
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
-            // Hapus foto lama
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $imagePath = $request->file('image')->store('products', 'public');
+            $uploaded = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'vinshop/products'
+            ]);
+            $imagePath = $uploaded->getSecurePath();
         }
 
         $product->update([
@@ -115,13 +114,14 @@ class AdminProductController extends Controller
             'is_active'   => $request->boolean('is_active'),
         ]);
 
-        // Upload foto tambahan baru kalau ada
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products', 'public');
+                $uploaded = Cloudinary::upload($image->getRealPath(), [
+                    'folder' => 'vinshop/products'
+                ]);
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image'      => $path,
+                    'image'      => $uploaded->getSecurePath(),
                     'order'      => $index,
                 ]);
             }
@@ -133,18 +133,7 @@ class AdminProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Hapus foto utama
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
-
-        // Hapus foto tambahan
-        foreach ($product->images as $image) {
-            Storage::disk('public')->delete($image->image);
-        }
-
         $product->delete();
-
         return redirect()->route('admin.products.index')
                          ->with('success', 'Produk berhasil dihapus!');
     }
