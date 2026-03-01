@@ -2,6 +2,8 @@
 
 VinShop adalah aplikasi web e-commerce yang dibangun menggunakan **Laravel 12** dengan fitur lengkap mulai dari manajemen produk, keranjang belanja, checkout, hingga integrasi pembayaran via **Midtrans**.
 
+🌐 **Live Demo:** [https://vinshop-production.up.railway.app](https://vinshop-production.up.railway.app)
+
 ---
 
 ## 🚀 Teknologi yang Digunakan
@@ -9,9 +11,9 @@ VinShop adalah aplikasi web e-commerce yang dibangun menggunakan **Laravel 12** 
 - **Laravel 12** - PHP Framework
 - **Laravel Breeze** - Authentication
 - **MySQL** - Database
-- **Tailwind CSS** - Styling
-- **Vite** - Asset Bundler
-- **Midtrans** - Payment Gateway
+- **Tailwind CSS** - Styling (CDN)
+- **Midtrans** - Payment Gateway (Sandbox)
+- **Railway** - Cloud Hosting
 - **XAMPP** - Local Development Server
 
 ---
@@ -24,7 +26,7 @@ VinShop adalah aplikasi web e-commerce yang dibangun menggunakan **Laravel 12** 
 - Halaman detail produk dengan foto gallery dan produk terkait
 - Keranjang belanja (tambah, update quantity, hapus)
 - Checkout dengan pilihan alamat pengiriman dan metode pembayaran
-- Pembayaran via Midtrans (QRIS, Transfer Bank, E-Wallet)
+- Pembayaran via Midtrans (QRIS, Transfer Bank, E-Wallet, GoPay)
 - Riwayat pesanan beserta status pengiriman dan pembayaran
 - Edit profile (nama, email, nomor HP, alamat, foto profil)
 - Ganti password
@@ -50,14 +52,14 @@ products ──< product_images
 ### Tabel Utama
 | Tabel | Keterangan |
 |---|---|
-| `users` | Data user dengan role admin/customer |
+| `users` | Data user dengan role admin/customer, foto profil (avatar) |
 | `categories` | Kategori produk dengan support sub-kategori |
 | `products` | Data produk |
 | `product_images` | Foto tambahan produk |
 | `carts` | Keranjang belanja user |
 | `orders` | Data pesanan |
 | `order_items` | Item dalam pesanan (snapshot harga) |
-| `payments` | Data pembayaran |
+| `payments` | Data pembayaran + snap_token Midtrans |
 
 ---
 
@@ -106,6 +108,9 @@ vinshop/
 │       │   ├── app.blade.php       # Layout customer
 │       │   └── admin.blade.php     # Layout admin
 │       ├── admin/
+│       ├── auth/
+│       │   ├── login.blade.php
+│       │   └── register.blade.php
 │       ├── cart/
 │       ├── orders/
 │       ├── payment/
@@ -123,11 +128,11 @@ vinshop/
 
 ---
 
-## ⚙️ Instalasi
+## ⚙️ Instalasi Lokal
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/username/vinshop.git
+git clone https://github.com/Havinoia/vinshop.git
 cd vinshop
 ```
 
@@ -187,6 +192,20 @@ Buka browser ke `http://localhost:8000`
 
 ---
 
+## ☁️ Hosting
+
+Aplikasi ini di-hosting di **Railway** dengan konfigurasi:
+
+| Komponen | Detail |
+|---|---|
+| Platform | Railway |
+| URL | https://vinshop-production.up.railway.app |
+| Database | MySQL (Railway) |
+| PHP | 8.2 (FrankenPHP) |
+| Deploy | Auto-deploy dari GitHub |
+
+---
+
 ## 👤 Akun Default
 
 | Role | Email | Password |
@@ -222,11 +241,24 @@ Login → Dashboard → Kelola Kategori & Produk
 | POST | `/cart/add` | Tambah ke keranjang |
 | GET | `/orders` | Riwayat pesanan |
 | POST | `/orders` | Buat pesanan |
-| GET | `/payment/{order}` | Halaman pembayaran |
+| GET | `/payment/{order}` | Halaman pembayaran Midtrans |
+| POST | `/payment/notification` | Webhook Midtrans |
+| GET | `/profile` | Edit profile & ganti password |
 | GET | `/admin/dashboard` | Dashboard admin |
 | GET | `/admin/products` | Kelola produk |
 | GET | `/admin/categories` | Kelola kategori |
 | GET | `/admin/orders` | Kelola pesanan |
+
+---
+
+## 💳 Testing Pembayaran Midtrans Sandbox
+
+| Metode | Detail |
+|---|---|
+| QRIS | Scan QR → otomatis success |
+| Kartu Kredit | `4811 1111 1111 1114` / Expiry: `01/26` / CVV: `123` / OTP: `112233` |
+| GoPay | Klik Pay → otomatis success |
+| Transfer Bank | Masukkan nomor VA → Confirm Payment |
 
 ---
 
